@@ -379,7 +379,14 @@ h2 {
 
 .purchase-select .select-menu {
   right: 0;
-  left: -100%;
+  left: auto;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+}
+
+.purchase-select .select-menu button {
+  white-space: nowrap;
+  padding-right: 16px;
 }
 
 .select-menu button {
