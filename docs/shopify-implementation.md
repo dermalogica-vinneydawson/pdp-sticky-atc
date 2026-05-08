@@ -20,13 +20,18 @@ width.
 The tray intentionally contains only:
 
 - custom size selector
-- one-time / subscription switch
+- purchase dropdown with one-time purchase and 3, 4, 5, and 6 month delivery options
 - add-to-cart button without price
 
 The Shopify section also includes a `Show size tag labels` setting. When it is
 enabled, each dropdown option can show a secondary variant label such as
 `travel`, `standard`, `retail`, `refill`, or `refill bundle`. When disabled,
 only the size value is shown.
+
+The purchase dropdown can auto-detect selling plan IDs by plan name when the
+product exposes selling plans such as `delivery every 3 months`. The section
+also includes explicit backend settings for the 3, 4, 5, and 6 month selling
+plan IDs when a theme needs manual mapping.
 
 ## Theme setup
 

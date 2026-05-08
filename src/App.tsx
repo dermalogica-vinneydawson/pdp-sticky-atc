@@ -6,6 +6,12 @@ type Size = {
   meta: string;
 };
 
+type PurchaseOption = {
+  id: string;
+  label: string;
+  shortLabel: string;
+};
+
 const sizes: Size[] = [
   { id: 'travel', label: '0.45 oz', meta: 'travel' },
   { id: 'standard', label: '1.4 oz', meta: 'standard' },
@@ -14,14 +20,22 @@ const sizes: Size[] = [
   { id: 'bundle', label: '2.6 oz + refill', meta: 'refill bundle' },
 ];
 
+const purchaseOptions: PurchaseOption[] = [
+  { id: 'one-time', label: 'one-time purchase', shortLabel: 'one-time' },
+  { id: 'delivery-3', label: 'delivery every 3 months', shortLabel: '3 months' },
+  { id: 'delivery-4', label: 'delivery every 4 months', shortLabel: '4 months' },
+  { id: 'delivery-5', label: 'delivery every 5 months', shortLabel: '5 months' },
+  { id: 'delivery-6', label: 'delivery every 6 months', shortLabel: '6 months' },
+];
+
 const productImage = `${import.meta.env.BASE_URL}images/gallery-1-benefits.jpg`;
 
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const defaultButtonRef = useRef<HTMLButtonElement | null>(null);
   const [selectedSize, setSelectedSize] = useState(sizes[2]);
-  const [purchaseType, setPurchaseType] = useState<'one-time' | 'subscription'>('one-time');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedPurchase, setSelectedPurchase] = useState(purchaseOptions[0]);
+  const [openDropdown, setOpenDropdown] = useState<'size' | 'purchase' | null>(null);
   const [isStickyVisible, setIsStickyVisible] = useState(false);
   const [showSizeTags, setShowSizeTags] = useState(true);
 
@@ -136,10 +150,12 @@ function App() {
           <div className="sticky-atc-inner">
             <div className={`custom-select ${showSizeTags ? 'has-size-tags' : 'hide-size-tags'}`}>
               <button
-                aria-expanded={isDropdownOpen}
+                aria-expanded={openDropdown === 'size'}
                 aria-haspopup="listbox"
                 type="button"
-                onClick={() => setIsDropdownOpen((open) => !open)}
+                onClick={() =>
+                  setOpenDropdown((open) => (open === 'size' ? null : 'size'))
+                }
               >
                 <span>
                   <small>size</small>
@@ -147,7 +163,7 @@ function App() {
                 </span>
                 <i aria-hidden="true" />
               </button>
-              {isDropdownOpen ? (
+              {openDropdown === 'size' ? (
                 <div className="select-menu" role="listbox">
                   {sizes.map((size) => (
                     <button
@@ -157,7 +173,7 @@ function App() {
                       type="button"
                       onClick={() => {
                         setSelectedSize(size);
-                        setIsDropdownOpen(false);
+                        setOpenDropdown(null);
                       }}
                     >
                       <span>{size.label}</span>
@@ -168,21 +184,39 @@ function App() {
               ) : null}
             </div>
 
-            <div className="purchase-switch" aria-label="Purchase option">
+            <div className="custom-select purchase-select">
               <button
-                className={purchaseType === 'one-time' ? 'is-active' : ''}
+                aria-expanded={openDropdown === 'purchase'}
+                aria-haspopup="listbox"
                 type="button"
-                onClick={() => setPurchaseType('one-time')}
+                onClick={() =>
+                  setOpenDropdown((open) => (open === 'purchase' ? null : 'purchase'))
+                }
               >
-                one-time
+                <span>
+                  <small>purchase</small>
+                  {selectedPurchase.shortLabel}
+                </span>
+                <i aria-hidden="true" />
               </button>
-              <button
-                className={purchaseType === 'subscription' ? 'is-active' : ''}
-                type="button"
-                onClick={() => setPurchaseType('subscription')}
-              >
-                subscribe
-              </button>
+              {openDropdown === 'purchase' ? (
+                <div className="select-menu" role="listbox">
+                  {purchaseOptions.map((option) => (
+                    <button
+                      aria-selected={selectedPurchase.id === option.id}
+                      key={option.id}
+                      role="option"
+                      type="button"
+                      onClick={() => {
+                        setSelectedPurchase(option);
+                        setOpenDropdown(null);
+                      }}
+                    >
+                      <span>{option.label}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <button className="sticky-button" type="button">

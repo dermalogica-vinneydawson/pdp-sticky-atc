@@ -9,6 +9,28 @@
   if sticky_product.selling_plan_groups.size > 0
     assign has_selling_plans = true
   endif
+
+  assign selling_plan_3_month_id = section.settings.selling_plan_3_month_id
+  assign selling_plan_4_month_id = section.settings.selling_plan_4_month_id
+  assign selling_plan_5_month_id = section.settings.selling_plan_5_month_id
+  assign selling_plan_6_month_id = section.settings.selling_plan_6_month_id
+  for selling_plan_group in sticky_product.selling_plan_groups
+    for selling_plan in selling_plan_group.selling_plans
+      assign plan_name = selling_plan.name | downcase
+      if selling_plan_3_month_id == blank and plan_name contains '3' and plan_name contains 'month'
+        assign selling_plan_3_month_id = selling_plan.id
+      endif
+      if selling_plan_4_month_id == blank and plan_name contains '4' and plan_name contains 'month'
+        assign selling_plan_4_month_id = selling_plan.id
+      endif
+      if selling_plan_5_month_id == blank and plan_name contains '5' and plan_name contains 'month'
+        assign selling_plan_5_month_id = selling_plan.id
+      endif
+      if selling_plan_6_month_id == blank and plan_name contains '6' and plan_name contains 'month'
+        assign selling_plan_6_month_id = selling_plan.id
+      endif
+    endfor
+  endfor
 -%}
 
 {%- if sticky_product != blank and current_variant != blank -%}
@@ -50,7 +72,7 @@
           aria-expanded="false"
           aria-haspopup="listbox"
           class="dgo-sticky-atc__select-button"
-          data-sticky-atc-select-button
+          data-sticky-atc-size-button
           type="button"
         >
           <span class="dgo-sticky-atc__select-button-label">
@@ -60,7 +82,7 @@
           <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
         </button>
 
-        <div class="dgo-sticky-atc__menu" data-sticky-atc-menu hidden role="listbox">
+        <div class="dgo-sticky-atc__menu" data-sticky-atc-size-menu hidden role="listbox">
           {%- for variant in sticky_product.variants -%}
             {%- liquid
               assign selling_plan_id = ''
@@ -99,27 +121,88 @@
         </div>
       </div>
 
-      {%- if section.settings.show_purchase_type_switch -%}
-        <div class="dgo-sticky-atc__switch" aria-label="{{ section.settings.purchase_type_label | escape }}">
+      {%- if section.settings.show_purchase_type_dropdown -%}
+        <div class="dgo-sticky-atc__select purchase-select" aria-label="{{ section.settings.purchase_type_label | escape }}">
           <button
-            aria-pressed="true"
-            class="dgo-sticky-atc__switch-button"
-            data-purchase-type="one-time"
-            data-sticky-atc-purchase
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            class="dgo-sticky-atc__select-button"
+            data-sticky-atc-purchase-button
             type="button"
           >
-            {{ section.settings.one_time_label }}
+            <span class="dgo-sticky-atc__select-button-label">
+              <small>{{ section.settings.purchase_type_label }}</small>
+              <span data-sticky-atc-selected-purchase>{{ section.settings.one_time_label }}</span>
+            </span>
+            <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
           </button>
-          <button
-            aria-pressed="false"
-            class="dgo-sticky-atc__switch-button"
-            data-purchase-type="subscription"
-            data-sticky-atc-purchase
-            type="button"
-            {% unless has_selling_plans or section.settings.fallback_selling_plan_id != blank %}disabled{% endunless %}
-          >
-            {{ section.settings.subscription_label }}
-          </button>
+
+          <div class="dgo-sticky-atc__menu" data-sticky-atc-purchase-menu hidden role="listbox">
+            <button
+              aria-selected="true"
+              class="dgo-sticky-atc__option"
+              data-purchase-button-label="{{ section.settings.one_time_short_label | escape }}"
+              data-purchase-label="{{ section.settings.one_time_label | escape }}"
+              data-selling-plan-id=""
+              data-sticky-atc-purchase-option
+              role="option"
+              type="button"
+            >
+              <span>{{ section.settings.one_time_label }}</span>
+            </button>
+            <button
+              aria-selected="false"
+              class="dgo-sticky-atc__option"
+              data-purchase-button-label="{{ section.settings.subscription_short_label | escape }}"
+              data-purchase-label="{{ section.settings.delivery_3_month_label | escape }}"
+              data-selling-plan-id="{{ selling_plan_3_month_id }}"
+              data-sticky-atc-purchase-option
+              role="option"
+              type="button"
+              {% unless has_selling_plans or selling_plan_3_month_id != blank %}disabled{% endunless %}
+            >
+              <span>{{ section.settings.delivery_3_month_label }}</span>
+            </button>
+            <button
+              aria-selected="false"
+              class="dgo-sticky-atc__option"
+              data-purchase-button-label="{{ section.settings.subscription_short_label | escape }}"
+              data-purchase-label="{{ section.settings.delivery_4_month_label | escape }}"
+              data-selling-plan-id="{{ selling_plan_4_month_id }}"
+              data-sticky-atc-purchase-option
+              role="option"
+              type="button"
+              {% unless has_selling_plans or selling_plan_4_month_id != blank %}disabled{% endunless %}
+            >
+              <span>{{ section.settings.delivery_4_month_label }}</span>
+            </button>
+            <button
+              aria-selected="false"
+              class="dgo-sticky-atc__option"
+              data-purchase-button-label="{{ section.settings.subscription_short_label | escape }}"
+              data-purchase-label="{{ section.settings.delivery_5_month_label | escape }}"
+              data-selling-plan-id="{{ selling_plan_5_month_id }}"
+              data-sticky-atc-purchase-option
+              role="option"
+              type="button"
+              {% unless has_selling_plans or selling_plan_5_month_id != blank %}disabled{% endunless %}
+            >
+              <span>{{ section.settings.delivery_5_month_label }}</span>
+            </button>
+            <button
+              aria-selected="false"
+              class="dgo-sticky-atc__option"
+              data-purchase-button-label="{{ section.settings.subscription_short_label | escape }}"
+              data-purchase-label="{{ section.settings.delivery_6_month_label | escape }}"
+              data-selling-plan-id="{{ selling_plan_6_month_id }}"
+              data-sticky-atc-purchase-option
+              role="option"
+              type="button"
+              {% unless has_selling_plans or selling_plan_6_month_id != blank %}disabled{% endunless %}
+            >
+              <span>{{ section.settings.delivery_6_month_label }}</span>
+            </button>
+          </div>
         </div>
       {%- endif -%}
 

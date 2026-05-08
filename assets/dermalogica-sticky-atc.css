@@ -46,7 +46,6 @@
 }
 
 .dgo-sticky-atc__select-button,
-.dgo-sticky-atc__switch,
 .dgo-sticky-atc__submit {
   width: 100%;
   min-height: 48px;
@@ -109,6 +108,11 @@
   right: -100%;
 }
 
+.dgo-sticky-atc__select.purchase-select .dgo-sticky-atc__menu {
+  right: 0;
+  left: -100%;
+}
+
 .dgo-sticky-atc__option {
   display: flex;
   align-items: center;
@@ -140,32 +144,6 @@
 .dgo-sticky-atc__option small {
   color: var(--dgo-sticky-atc-muted);
   font-size: 12px;
-}
-
-.dgo-sticky-atc__switch {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  border: 1px solid var(--dgo-sticky-atc-line);
-  background: #fff;
-}
-
-.dgo-sticky-atc__switch-button {
-  min-height: 40px;
-  border: 0;
-  border-radius: var(--dgo-sticky-atc-radius);
-  background: transparent;
-  color: var(--dgo-sticky-atc-primary);
-  font: inherit;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.dgo-sticky-atc__switch-button[aria-pressed="true"] {
-  background: var(--dgo-sticky-atc-primary);
-  color: #fff;
 }
 
 .dgo-sticky-atc__submit {

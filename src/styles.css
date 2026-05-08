@@ -313,7 +313,6 @@ h2 {
 }
 
 .custom-select > button,
-.purchase-switch,
 .sticky-button {
   width: 100%;
   min-height: 48px;
@@ -378,6 +377,11 @@ h2 {
   right: -100%;
 }
 
+.purchase-select .select-menu {
+  right: 0;
+  left: -100%;
+}
+
 .select-menu button {
   display: flex;
   align-items: center;
@@ -403,31 +407,6 @@ h2 {
   color: inherit;
   font-size: 14px;
   font-weight: 600;
-}
-
-.purchase-switch {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  border: 1px solid var(--line);
-  background: #ffffff;
-}
-
-.purchase-switch button {
-  min-height: 40px;
-  border: 0;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--primary);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.purchase-switch button.is-active {
-  background: var(--primary);
-  color: #ffffff;
 }
 
 @media (max-width: 520px) {
