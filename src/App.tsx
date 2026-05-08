@@ -23,6 +23,7 @@ function App() {
   const [purchaseType, setPurchaseType] = useState<'one-time' | 'subscription'>('one-time');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isStickyVisible, setIsStickyVisible] = useState(false);
+  const [showSizeTags, setShowSizeTags] = useState(true);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -49,6 +50,26 @@ function App() {
 
   return (
     <main className="prototype-shell">
+      <div className="preview-controls" aria-label="Preview settings">
+        <span>size tag labels</span>
+        <div className="preview-toggle">
+          <button
+            className={showSizeTags ? 'is-active' : ''}
+            type="button"
+            onClick={() => setShowSizeTags(true)}
+          >
+            on
+          </button>
+          <button
+            className={!showSizeTags ? 'is-active' : ''}
+            type="button"
+            onClick={() => setShowSizeTags(false)}
+          >
+            off
+          </button>
+        </div>
+      </div>
+
       <section className="phone-frame" aria-label="Mobile sticky add to cart prototype">
         <div className="browser-bar" aria-hidden="true">
           <span />
@@ -140,7 +161,7 @@ function App() {
                       }}
                     >
                       <span>{size.label}</span>
-                      <small>{size.meta}</small>
+                      {showSizeTags ? <small>{size.meta}</small> : null}
                     </button>
                   ))}
                 </div>
