@@ -164,6 +164,34 @@
 
 .dgo-sticky-atc__submit:disabled {
   opacity: 0.56;
+  cursor: not-allowed;
+}
+
+.dgo-sticky-atc__option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dgo-sticky-atc__select-button:focus-visible,
+.dgo-sticky-atc__option:focus-visible,
+.dgo-sticky-atc__submit:focus-visible {
+  outline: 2px solid var(--dgo-sticky-atc-primary);
+  outline-offset: 2px;
+}
+
+.dgo-sticky-atc__status {
+  position: absolute;
+  left: -9999px;
+}
+
+.dgo-sticky-atc__status.is-error {
+  position: static;
+  display: block;
+  grid-column: 1 / -1;
+  margin-top: 6px;
+  color: #b1322a;
+  font-size: 12px;
+  text-align: center;
 }
 
 .dgo-sticky-atc__submit svg {

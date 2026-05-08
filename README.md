@@ -1,10 +1,13 @@
 # Dermalogica Sticky Add to Cart
 
-Mobile-only Shopify Plus sticky add-to-cart component with a local Vite preview.
+Mobile-first Shopify Plus sticky add-to-cart section with a local Vite preview.
 
-The sticky tray appears when the default product form add-to-cart button leaves
-the viewport. It is intentionally minimal: size selector, one-time/subscription
-switch, and add-to-cart button.
+The sticky tray slides in when the default product form add-to-cart button leaves
+the viewport. It contains a size selector, a delivery-frequency dropdown
+(one-time + 3 / 4 / 5 / 6 month subscription cadences), and an add-to-cart
+button. Subscription support assumes Recharge Checkout on Shopify (i.e. native
+Shopify `selling_plan_groups` / `selling_plan` flow), which is what Dermalogica
+runs.
 
 ## Local Preview
 
@@ -13,28 +16,23 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173/`.
-
-The preview is a mobile browser mockup for validating the interaction and visual
-treatment before installing the Shopify files.
+Open `http://127.0.0.1:5173/`. The preview is a Dermalogica-specific mockup for
+validating interaction and visual treatment — it does not consume real Shopify
+product data.
 
 ## Shopify Handoff Files
 
-Copy these files into the matching folders in the Shopify theme:
+Copy these into the matching folders in the theme:
 
 - `sections/dermalogica-sticky-add-to-cart.liquid`
 - `snippets/dermalogica-sticky-atc.liquid`
 - `assets/dermalogica-sticky-atc.css`
 - `assets/dermalogica-sticky-atc.js`
 
-Then add the `Sticky add to cart` section to a product template in Shopify
-Customize.
+Add the `Sticky add to cart` section to the product template in Customize.
 
-## Preview Source
-
-- `src/App.tsx` - mobile browser mockup and interaction prototype
-- `src/styles.css` - preview styling
-- `public/images/gallery-1-benefits.jpg` - preview product image
+See `docs/shopify-implementation.md` for setting reference, Recharge notes, and
+selector overrides for non-Dawn themes.
 
 ## Checks
 

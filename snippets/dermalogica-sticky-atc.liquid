@@ -1,7 +1,11 @@
 {%- liquid
   assign sticky_product = product
+  assign override_active = false
   if section.settings.product != blank
     assign sticky_product = section.settings.product
+    if section.settings.product.id != product.id
+      assign override_active = true
+    endif
   endif
 
   assign current_variant = sticky_product.selected_or_first_available_variant
@@ -10,6 +14,24 @@
     assign has_selling_plans = true
   endif
 
+  comment
+    Resolve which option index represents Size by name match. Falls back to option1.
+    Tag label is the first non-size option (typically variant size class: travel, retail, refill, etc).
+  endcomment
+  assign size_option_index = 0
+  assign tag_option_index = -1
+  for option in sticky_product.options_with_values
+    assign option_name_lc = option.name | downcase
+    if option_name_lc contains 'size' or option_name_lc contains 'taille' or option_name_lc contains 'größe' or option_name_lc contains 'tamaño'
+      assign size_option_index = forloop.index0
+    endif
+  endfor
+  for option in sticky_product.options_with_values
+    if forloop.index0 != size_option_index and tag_option_index == -1
+      assign tag_option_index = forloop.index0
+    endif
+  endfor
+
   assign selling_plan_3_month_id = section.settings.selling_plan_3_month_id
   assign selling_plan_4_month_id = section.settings.selling_plan_4_month_id
   assign selling_plan_5_month_id = section.settings.selling_plan_5_month_id
@@ -17,17 +39,31 @@
   for selling_plan_group in sticky_product.selling_plan_groups
     for selling_plan in selling_plan_group.selling_plans
       assign plan_name = selling_plan.name | downcase
-      if selling_plan_3_month_id == blank and plan_name contains '3' and plan_name contains 'month'
-        assign selling_plan_3_month_id = selling_plan.id
+      assign plan_has_month = false
+      if plan_name contains 'month' or plan_name contains 'mois' or plan_name contains 'monat' or plan_name contains 'mes'
+        assign plan_has_month = true
       endif
-      if selling_plan_4_month_id == blank and plan_name contains '4' and plan_name contains 'month'
-        assign selling_plan_4_month_id = selling_plan.id
-      endif
-      if selling_plan_5_month_id == blank and plan_name contains '5' and plan_name contains 'month'
-        assign selling_plan_5_month_id = selling_plan.id
-      endif
-      if selling_plan_6_month_id == blank and plan_name contains '6' and plan_name contains 'month'
-        assign selling_plan_6_month_id = selling_plan.id
+      if plan_has_month
+        if selling_plan_3_month_id == blank and plan_name contains '3 '
+          assign selling_plan_3_month_id = selling_plan.id
+        elsif selling_plan_3_month_id == blank and plan_name contains ' 3'
+          assign selling_plan_3_month_id = selling_plan.id
+        endif
+        if selling_plan_4_month_id == blank and plan_name contains '4 '
+          assign selling_plan_4_month_id = selling_plan.id
+        elsif selling_plan_4_month_id == blank and plan_name contains ' 4'
+          assign selling_plan_4_month_id = selling_plan.id
+        endif
+        if selling_plan_5_month_id == blank and plan_name contains '5 '
+          assign selling_plan_5_month_id = selling_plan.id
+        elsif selling_plan_5_month_id == blank and plan_name contains ' 5'
+          assign selling_plan_5_month_id = selling_plan.id
+        endif
+        if selling_plan_6_month_id == blank and plan_name contains '6 '
+          assign selling_plan_6_month_id = selling_plan.id
+        elsif selling_plan_6_month_id == blank and plan_name contains ' 6'
+          assign selling_plan_6_month_id = selling_plan.id
+        endif
       endif
     endfor
   endfor
@@ -45,13 +81,25 @@
     data-selling-plan-selector="{{ section.settings.selling_plan_selector | escape }}"
     data-quantity-selector="{{ section.settings.quantity_selector | escape }}"
     data-fallback-selling-plan-id="{{ section.settings.fallback_selling_plan_id | escape }}"
+    data-product-id="{{ sticky_product.id }}"
+    data-page-product-id="{{ product.id }}"
+    data-override-active="{{ override_active }}"
+    data-sold-out-label="{{ section.settings.sold_out_label | escape }}"
+    data-button-label="{{ section.settings.button_label | escape }}"
+    data-adding-label="{{ section.settings.adding_label | escape }}"
+    data-added-label="{{ section.settings.added_label | escape }}"
+    data-error-label="{{ section.settings.error_label | escape }}"
+    data-cart-drawer-selector="{{ section.settings.cart_drawer_selector | escape }}"
+    data-event-namespace="{{ section.settings.event_namespace | default: 'sticky_atc' | escape }}"
+    data-experiment-id="{{ section.settings.experiment_id | escape }}"
+    data-experiment-variant="{{ section.settings.experiment_variant | escape }}"
     style="
       --dgo-sticky-atc-primary: {{ section.settings.primary_color }};
       --dgo-sticky-atc-radius: {{ section.settings.border_radius }}px;
       --dgo-sticky-atc-z-index: {{ section.settings.z_index }};
     "
   >
-    {%- form 'product', sticky_product, class: 'dgo-sticky-atc__form' -%}
+    {%- form 'product', sticky_product, class: 'dgo-sticky-atc__form', novalidate: 'novalidate' -%}
       <input
         data-sticky-atc-variant-input
         name="id"
@@ -59,6 +107,9 @@
         value="{{ current_variant.id }}"
       >
       <input name="quantity" type="hidden" value="1">
+      {%- if section.settings.attribute_line_items -%}
+        <input name="properties[_source]" type="hidden" value="{{ section.settings.line_item_source | default: 'sticky-atc' | escape }}">
+      {%- endif -%}
       <input
         data-sticky-atc-selling-plan-input
         name="selling_plan"
@@ -71,6 +122,7 @@
         <button
           aria-expanded="false"
           aria-haspopup="listbox"
+          aria-label="{{ section.settings.size_label | escape }}"
           class="dgo-sticky-atc__select-button"
           data-sticky-atc-size-button
           type="button"
@@ -82,7 +134,7 @@
           <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
         </button>
 
-        <div class="dgo-sticky-atc__menu" data-sticky-atc-size-menu hidden role="listbox">
+        <div class="dgo-sticky-atc__menu" data-sticky-atc-size-menu hidden role="listbox" aria-label="{{ section.settings.size_label | escape }}">
           {%- for variant in sticky_product.variants -%}
             {%- liquid
               assign selling_plan_id = ''
@@ -92,12 +144,34 @@
 
               assign variant_size_label = variant.title
               assign variant_tag_label = ''
-              if variant.option1 != blank and variant.option1 != 'Default Title'
-                assign variant_size_label = variant.option1
-              endif
-              if variant.option2 != blank and variant.option2 != 'Default Title'
-                assign variant_tag_label = variant.option2
-              endif
+              case size_option_index
+                when 0
+                  if variant.option1 != blank and variant.option1 != 'Default Title'
+                    assign variant_size_label = variant.option1
+                  endif
+                when 1
+                  if variant.option2 != blank
+                    assign variant_size_label = variant.option2
+                  endif
+                when 2
+                  if variant.option3 != blank
+                    assign variant_size_label = variant.option3
+                  endif
+              endcase
+              case tag_option_index
+                when 0
+                  if variant.option1 != blank and variant.option1 != 'Default Title'
+                    assign variant_tag_label = variant.option1
+                  endif
+                when 1
+                  if variant.option2 != blank
+                    assign variant_tag_label = variant.option2
+                  endif
+                when 2
+                  if variant.option3 != blank
+                    assign variant_tag_label = variant.option3
+                  endif
+              endcase
             -%}
             <button
               aria-selected="{% if variant.id == current_variant.id %}true{% else %}false{% endif %}"
@@ -105,10 +179,12 @@
               data-sticky-atc-option
               data-variant-id="{{ variant.id }}"
               data-variant-title="{{ variant_size_label | escape }}"
+              data-variant-available="{{ variant.available }}"
               data-selling-plan-id="{{ selling_plan_id }}"
               role="option"
+              tabindex="-1"
               type="button"
-              {% unless variant.available %}disabled{% endunless %}
+              {% unless variant.available %}disabled aria-disabled="true"{% endunless %}
             >
               <span>{{ variant_size_label }}</span>
               {%- if section.settings.show_size_tag_labels and variant_tag_label != blank -%}
@@ -122,10 +198,11 @@
       </div>
 
       {%- if section.settings.show_purchase_type_dropdown -%}
-        <div class="dgo-sticky-atc__select purchase-select" aria-label="{{ section.settings.purchase_type_label | escape }}">
+        <div class="dgo-sticky-atc__select purchase-select">
           <button
             aria-expanded="false"
             aria-haspopup="listbox"
+            aria-label="{{ section.settings.purchase_type_label | escape }}"
             class="dgo-sticky-atc__select-button"
             data-sticky-atc-purchase-button
             type="button"
@@ -137,7 +214,7 @@
             <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
           </button>
 
-          <div class="dgo-sticky-atc__menu" data-sticky-atc-purchase-menu hidden role="listbox">
+          <div class="dgo-sticky-atc__menu" data-sticky-atc-purchase-menu hidden role="listbox" aria-label="{{ section.settings.purchase_type_label | escape }}">
             <button
               aria-selected="true"
               class="dgo-sticky-atc__option"
@@ -146,6 +223,7 @@
               data-selling-plan-id=""
               data-sticky-atc-purchase-option
               role="option"
+              tabindex="-1"
               type="button"
             >
               <span>{{ section.settings.one_time_label }}</span>
@@ -158,8 +236,9 @@
               data-selling-plan-id="{{ selling_plan_3_month_id }}"
               data-sticky-atc-purchase-option
               role="option"
+              tabindex="-1"
               type="button"
-              {% unless has_selling_plans or selling_plan_3_month_id != blank %}disabled{% endunless %}
+              {% unless has_selling_plans or selling_plan_3_month_id != blank %}disabled aria-disabled="true"{% endunless %}
             >
               <span>{{ section.settings.delivery_3_month_label }}</span>
             </button>
@@ -171,8 +250,9 @@
               data-selling-plan-id="{{ selling_plan_4_month_id }}"
               data-sticky-atc-purchase-option
               role="option"
+              tabindex="-1"
               type="button"
-              {% unless has_selling_plans or selling_plan_4_month_id != blank %}disabled{% endunless %}
+              {% unless has_selling_plans or selling_plan_4_month_id != blank %}disabled aria-disabled="true"{% endunless %}
             >
               <span>{{ section.settings.delivery_4_month_label }}</span>
             </button>
@@ -184,8 +264,9 @@
               data-selling-plan-id="{{ selling_plan_5_month_id }}"
               data-sticky-atc-purchase-option
               role="option"
+              tabindex="-1"
               type="button"
-              {% unless has_selling_plans or selling_plan_5_month_id != blank %}disabled{% endunless %}
+              {% unless has_selling_plans or selling_plan_5_month_id != blank %}disabled aria-disabled="true"{% endunless %}
             >
               <span>{{ section.settings.delivery_5_month_label }}</span>
             </button>
@@ -197,8 +278,9 @@
               data-selling-plan-id="{{ selling_plan_6_month_id }}"
               data-sticky-atc-purchase-option
               role="option"
+              tabindex="-1"
               type="button"
-              {% unless has_selling_plans or selling_plan_6_month_id != blank %}disabled{% endunless %}
+              {% unless has_selling_plans or selling_plan_6_month_id != blank %}disabled aria-disabled="true"{% endunless %}
             >
               <span>{{ section.settings.delivery_6_month_label }}</span>
             </button>
@@ -216,12 +298,15 @@
         <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M4.5835 12.8333H16.6246C17.553 12.8333 18.0172 12.8333 18.3868 12.6602C18.7123 12.5078 18.9858 12.2629 19.1733 11.9562C19.3862 11.608 19.4374 11.1467 19.54 10.2239L20.0762 5.39764C20.1075 5.1158 20.1232 4.97488 20.0779 4.86581C20.0381 4.77001 19.967 4.69055 19.8761 4.64041C19.7727 4.58333 19.631 4.58333 19.3474 4.58333H4.12517M1.83337 1.83333H2.97778C3.22035 1.83333 3.34163 1.83333 3.43652 1.87946C3.52006 1.92007 3.58928 1.9851 3.63503 2.06594C3.68698 2.15777 3.69455 2.27882 3.70968 2.52092L4.5404 15.8124C4.55553 16.0545 4.5631 16.1756 4.61506 16.2674C4.6608 16.3482 4.73002 16.4133 4.81356 16.4539C4.90845 16.5 5.02973 16.5 5.2723 16.5H17.4167M6.87504 19.7083H6.88421M15.125 19.7083H15.1342M7.33337 19.7083C7.33337 19.9615 7.12817 20.1667 6.87504 20.1667C6.62191 20.1667 6.41671 19.9615 6.41671 19.7083C6.41671 19.4552 6.62191 19.25 6.87504 19.25C7.12817 19.25 7.33337 19.4552 7.33337 19.7083ZM15.5834 19.7083C15.5834 19.9615 15.3782 20.1667 15.125 20.1667C14.8719 20.1667 14.6667 19.9615 14.6667 19.7083C14.6667 19.4552 14.8719 19.25 15.125 19.25C15.3782 19.25 15.5834 19.4552 15.5834 19.7083Z" stroke="currentColor" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        {%- if current_variant.available -%}
-          {{ section.settings.button_label }}
-        {%- else -%}
-          {{ section.settings.sold_out_label }}
-        {%- endif -%}
+        <span data-sticky-atc-submit-label>
+          {%- if current_variant.available -%}
+            {{ section.settings.button_label }}
+          {%- else -%}
+            {{ section.settings.sold_out_label }}
+          {%- endif -%}
+        </span>
       </button>
+      <span class="dgo-sticky-atc__status" data-sticky-atc-status role="status" aria-live="polite"></span>
     {%- endform -%}
   </dermalogica-sticky-atc>
 {%- endif -%}

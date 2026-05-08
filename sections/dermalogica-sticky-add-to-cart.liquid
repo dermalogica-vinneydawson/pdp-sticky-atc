@@ -156,6 +156,68 @@
       "default": "sold out"
     },
     {
+      "type": "text",
+      "id": "adding_label",
+      "label": "Adding label",
+      "default": "adding..."
+    },
+    {
+      "type": "text",
+      "id": "added_label",
+      "label": "Added label",
+      "default": "added"
+    },
+    {
+      "type": "text",
+      "id": "error_label",
+      "label": "Error label",
+      "default": "couldn't add. try again."
+    },
+    {
+      "type": "header",
+      "content": "A/B testing & tracking"
+    },
+    {
+      "type": "text",
+      "id": "experiment_id",
+      "label": "Experiment ID",
+      "info": "Optional. Echoed into every tracked event (e.g. wfopt-sticky-atc-001) so Webflow Optimize / GA4 can segment by test."
+    },
+    {
+      "type": "text",
+      "id": "experiment_variant",
+      "label": "Experiment variant",
+      "info": "Optional. Treatment label echoed into events (e.g. control, treatment-a)."
+    },
+    {
+      "type": "text",
+      "id": "event_namespace",
+      "label": "Event namespace",
+      "default": "sticky_atc",
+      "info": "Prefix for dataLayer events: <prefix>_shown, <prefix>_atc_click, <prefix>_atc_success, etc."
+    },
+    {
+      "type": "checkbox",
+      "id": "attribute_line_items",
+      "label": "Tag added items with source",
+      "info": "Adds properties[_source]=sticky-atc so orders can be attributed in Shopify analytics.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "line_item_source",
+      "label": "Line item source value",
+      "default": "sticky-atc",
+      "info": "Value written to properties[_source] on items added via the sticky bar."
+    },
+    {
+      "type": "text",
+      "id": "cart_drawer_selector",
+      "label": "Cart drawer trigger selector",
+      "info": "Optional. CSS selector for the cart drawer/icon to open after a successful add (e.g. cart-drawer, [data-cart-drawer-toggle]).",
+      "default": "cart-drawer, [data-cart-drawer-toggle]"
+    },
+    {
       "type": "color",
       "id": "primary_color",
       "label": "Primary color",
@@ -178,7 +240,7 @@
       "min": 1,
       "max": 100,
       "step": 1,
-      "default": 40
+      "default": 60
     }
   ],
   "presets": [
