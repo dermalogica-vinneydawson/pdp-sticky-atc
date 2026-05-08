@@ -1,0 +1,129 @@
+{% render 'dermalogica-sticky-atc' %}
+
+{% schema %}
+{
+  "name": "Sticky add to cart",
+  "tag": "section",
+  "class": "section-dermalogica-sticky-atc",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product override",
+      "info": "Leave blank to use the current product."
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_only",
+      "label": "Show on mobile only",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "trigger_selector",
+      "label": "Default add-to-cart button selector",
+      "default": "form[action*='/cart/add'] [type='submit']",
+      "info": "Sticky bar appears when this default button is outside the viewport."
+    },
+    {
+      "type": "text",
+      "id": "variant_selector",
+      "label": "Default variant input selector",
+      "default": "form[action*='/cart/add'] [name='id']"
+    },
+    {
+      "type": "text",
+      "id": "selling_plan_selector",
+      "label": "Default selling plan input selector",
+      "default": "form[action*='/cart/add'] [name='selling_plan']"
+    },
+    {
+      "type": "text",
+      "id": "quantity_selector",
+      "label": "Default quantity input selector",
+      "default": "form[action*='/cart/add'] [name='quantity']"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_purchase_type_switch",
+      "label": "Show one-time/subscription switch",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "fallback_selling_plan_id",
+      "label": "Fallback subscription selling plan ID",
+      "info": "Optional. Used only when variant selling plan allocations are unavailable in Liquid."
+    },
+    {
+      "type": "text",
+      "id": "size_label",
+      "label": "Size label",
+      "default": "size"
+    },
+    {
+      "type": "text",
+      "id": "purchase_type_label",
+      "label": "Purchase type accessible label",
+      "default": "Purchase option"
+    },
+    {
+      "type": "text",
+      "id": "one_time_label",
+      "label": "One-time label",
+      "default": "one-time"
+    },
+    {
+      "type": "text",
+      "id": "subscription_label",
+      "label": "Subscription label",
+      "default": "subscribe"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "add to cart"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_label",
+      "label": "Sold out label",
+      "default": "sold out"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary color",
+      "default": "#5b6670"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "z_index",
+      "label": "Z-index",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Sticky add to cart"
+    }
+  ]
+}
+{% endschema %}

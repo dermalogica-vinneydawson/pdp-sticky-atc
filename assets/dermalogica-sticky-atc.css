@@ -1,0 +1,203 @@
+.dgo-sticky-atc {
+  --dgo-sticky-atc-primary: #5b6670;
+  --dgo-sticky-atc-radius: 3px;
+  --dgo-sticky-atc-line: #dfe3e6;
+  --dgo-sticky-atc-ink: #283138;
+  --dgo-sticky-atc-muted: #6b7480;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--dgo-sticky-atc-z-index, 40);
+  width: 100vw;
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--dgo-sticky-atc-line);
+  background: #fff;
+  box-shadow: 0 -10px 32px rgba(40, 49, 56, 0.12);
+  color: var(--dgo-sticky-atc-ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(110%);
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease;
+}
+
+.dgo-sticky-atc.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.dgo-sticky-atc[hidden] {
+  display: none;
+}
+
+.dgo-sticky-atc__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 9px;
+  margin: 0;
+}
+
+.dgo-sticky-atc__select {
+  position: relative;
+}
+
+.dgo-sticky-atc__select-button,
+.dgo-sticky-atc__switch,
+.dgo-sticky-atc__submit {
+  width: 100%;
+  min-height: 48px;
+  border-radius: var(--dgo-sticky-atc-radius);
+  font: inherit;
+}
+
+.dgo-sticky-atc__select-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 13px;
+  border: 1px solid var(--dgo-sticky-atc-line);
+  background: #fff;
+  color: var(--dgo-sticky-atc-primary);
+  text-align: left;
+}
+
+.dgo-sticky-atc__select-button-label {
+  display: grid;
+  gap: 3px;
+  color: var(--dgo-sticky-atc-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.dgo-sticky-atc__select-button-label small {
+  color: var(--dgo-sticky-atc-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.dgo-sticky-atc__chevron {
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid var(--dgo-sticky-atc-primary);
+  border-bottom: 1.5px solid var(--dgo-sticky-atc-primary);
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.dgo-sticky-atc__menu {
+  position: absolute;
+  right: -100%;
+  bottom: calc(100% + 7px);
+  left: 0;
+  z-index: 2;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--dgo-sticky-atc-line);
+  border-radius: var(--dgo-sticky-atc-radius);
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(40, 49, 56, 0.16);
+}
+
+.dgo-sticky-atc__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--dgo-sticky-atc-line);
+  background: #fff;
+  color: var(--dgo-sticky-atc-primary);
+  font: inherit;
+  text-align: left;
+}
+
+.dgo-sticky-atc__option:last-child {
+  border-bottom: 0;
+}
+
+.dgo-sticky-atc__option[aria-selected="true"] {
+  background: #edf0f2;
+  color: var(--dgo-sticky-atc-primary);
+}
+
+.dgo-sticky-atc__option span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dgo-sticky-atc__option small {
+  color: var(--dgo-sticky-atc-muted);
+  font-size: 12px;
+}
+
+.dgo-sticky-atc__switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border: 1px solid var(--dgo-sticky-atc-line);
+  background: #fff;
+}
+
+.dgo-sticky-atc__switch-button {
+  min-height: 40px;
+  border: 0;
+  border-radius: var(--dgo-sticky-atc-radius);
+  background: transparent;
+  color: var(--dgo-sticky-atc-primary);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dgo-sticky-atc__switch-button[aria-pressed="true"] {
+  background: var(--dgo-sticky-atc-primary);
+  color: #fff;
+}
+
+.dgo-sticky-atc__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  grid-column: 1 / -1;
+  border: 0;
+  background: var(--dgo-sticky-atc-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dgo-sticky-atc__submit:disabled {
+  opacity: 0.56;
+}
+
+.dgo-sticky-atc__submit svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 750px) {
+  .dgo-sticky-atc[data-mobile-only="true"] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dgo-sticky-atc {
+    transition-duration: 0.01ms;
+  }
+}

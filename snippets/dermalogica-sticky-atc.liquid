@@ -1,0 +1,133 @@
+{%- liquid
+  assign sticky_product = product
+  if section.settings.product != blank
+    assign sticky_product = section.settings.product
+  endif
+
+  assign current_variant = sticky_product.selected_or_first_available_variant
+  assign has_selling_plans = false
+  if sticky_product.selling_plan_groups.size > 0
+    assign has_selling_plans = true
+  endif
+-%}
+
+{%- if sticky_product != blank and current_variant != blank -%}
+  {{ 'dermalogica-sticky-atc.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'dermalogica-sticky-atc.js' | asset_url }}" defer="defer"></script>
+
+  <dermalogica-sticky-atc
+    class="dgo-sticky-atc"
+    data-mobile-only="{{ section.settings.mobile_only }}"
+    data-trigger-selector="{{ section.settings.trigger_selector | escape }}"
+    data-variant-selector="{{ section.settings.variant_selector | escape }}"
+    data-selling-plan-selector="{{ section.settings.selling_plan_selector | escape }}"
+    data-quantity-selector="{{ section.settings.quantity_selector | escape }}"
+    data-fallback-selling-plan-id="{{ section.settings.fallback_selling_plan_id | escape }}"
+    style="
+      --dgo-sticky-atc-primary: {{ section.settings.primary_color }};
+      --dgo-sticky-atc-radius: {{ section.settings.border_radius }}px;
+      --dgo-sticky-atc-z-index: {{ section.settings.z_index }};
+    "
+  >
+    {%- form 'product', sticky_product, class: 'dgo-sticky-atc__form' -%}
+      <input
+        data-sticky-atc-variant-input
+        name="id"
+        type="hidden"
+        value="{{ current_variant.id }}"
+      >
+      <input name="quantity" type="hidden" value="1">
+      <input
+        data-sticky-atc-selling-plan-input
+        name="selling_plan"
+        type="hidden"
+        value=""
+        disabled
+      >
+
+      <div class="dgo-sticky-atc__select">
+        <button
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          class="dgo-sticky-atc__select-button"
+          data-sticky-atc-select-button
+          type="button"
+        >
+          <span class="dgo-sticky-atc__select-button-label">
+            <small>{{ section.settings.size_label }}</small>
+            <span data-sticky-atc-selected-title>{{ current_variant.title }}</span>
+          </span>
+          <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
+        </button>
+
+        <div class="dgo-sticky-atc__menu" data-sticky-atc-menu hidden role="listbox">
+          {%- for variant in sticky_product.variants -%}
+            {%- liquid
+              assign selling_plan_id = ''
+              if variant.selling_plan_allocations.size > 0
+                assign selling_plan_id = variant.selling_plan_allocations.first.selling_plan.id
+              endif
+            -%}
+            <button
+              aria-selected="{% if variant.id == current_variant.id %}true{% else %}false{% endif %}"
+              class="dgo-sticky-atc__option"
+              data-sticky-atc-option
+              data-variant-id="{{ variant.id }}"
+              data-variant-title="{{ variant.title | escape }}"
+              data-selling-plan-id="{{ selling_plan_id }}"
+              role="option"
+              type="button"
+              {% unless variant.available %}disabled{% endunless %}
+            >
+              <span>{{ variant.title }}</span>
+              {%- unless variant.available -%}
+                <small>{{ section.settings.sold_out_label }}</small>
+              {%- endunless -%}
+            </button>
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- if section.settings.show_purchase_type_switch -%}
+        <div class="dgo-sticky-atc__switch" aria-label="{{ section.settings.purchase_type_label | escape }}">
+          <button
+            aria-pressed="true"
+            class="dgo-sticky-atc__switch-button"
+            data-purchase-type="one-time"
+            data-sticky-atc-purchase
+            type="button"
+          >
+            {{ section.settings.one_time_label }}
+          </button>
+          <button
+            aria-pressed="false"
+            class="dgo-sticky-atc__switch-button"
+            data-purchase-type="subscription"
+            data-sticky-atc-purchase
+            type="button"
+            {% unless has_selling_plans or section.settings.fallback_selling_plan_id != blank %}disabled{% endunless %}
+          >
+            {{ section.settings.subscription_label }}
+          </button>
+        </div>
+      {%- endif -%}
+
+      <button
+        class="dgo-sticky-atc__submit"
+        data-sticky-atc-submit
+        name="add"
+        type="submit"
+        {% unless current_variant.available %}disabled{% endunless %}
+      >
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.5835 12.8333H16.6246C17.553 12.8333 18.0172 12.8333 18.3868 12.6602C18.7123 12.5078 18.9858 12.2629 19.1733 11.9562C19.3862 11.608 19.4374 11.1467 19.54 10.2239L20.0762 5.39764C20.1075 5.1158 20.1232 4.97488 20.0779 4.86581C20.0381 4.77001 19.967 4.69055 19.8761 4.64041C19.7727 4.58333 19.631 4.58333 19.3474 4.58333H4.12517M1.83337 1.83333H2.97778C3.22035 1.83333 3.34163 1.83333 3.43652 1.87946C3.52006 1.92007 3.58928 1.9851 3.63503 2.06594C3.68698 2.15777 3.69455 2.27882 3.70968 2.52092L4.5404 15.8124C4.55553 16.0545 4.5631 16.1756 4.61506 16.2674C4.6608 16.3482 4.73002 16.4133 4.81356 16.4539C4.90845 16.5 5.02973 16.5 5.2723 16.5H17.4167M6.87504 19.7083H6.88421M15.125 19.7083H15.1342M7.33337 19.7083C7.33337 19.9615 7.12817 20.1667 6.87504 20.1667C6.62191 20.1667 6.41671 19.9615 6.41671 19.7083C6.41671 19.4552 6.62191 19.25 6.87504 19.25C7.12817 19.25 7.33337 19.4552 7.33337 19.7083ZM15.5834 19.7083C15.5834 19.9615 15.3782 20.1667 15.125 20.1667C14.8719 20.1667 14.6667 19.9615 14.6667 19.7083C14.6667 19.4552 14.8719 19.25 15.125 19.25C15.3782 19.25 15.5834 19.4552 15.5834 19.7083Z" stroke="currentColor" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        {%- if current_variant.available -%}
+          {{ section.settings.button_label }}
+        {%- else -%}
+          {{ section.settings.sold_out_label }}
+        {%- endif -%}
+      </button>
+    {%- endform -%}
+  </dermalogica-sticky-atc>
+{%- endif -%}
