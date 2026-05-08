@@ -110,7 +110,14 @@
 
 .dgo-sticky-atc__select.purchase-select .dgo-sticky-atc__menu {
   right: 0;
-  left: -100%;
+  left: auto;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+}
+
+.dgo-sticky-atc__select.purchase-select .dgo-sticky-atc__option {
+  white-space: nowrap;
+  padding-right: 16px;
 }
 
 .dgo-sticky-atc__option {
