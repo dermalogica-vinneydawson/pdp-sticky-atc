@@ -33,6 +33,58 @@ the dropdown and the submit button is disabled.
 
 If `fetch` is unavailable, the form falls back to a normal browser submit.
 
+## Theme integration (live Dermalogica PDP)
+
+The live PDP does not use a Shopify `<form action="/cart/add">`. The
+add-to-cart button calls a global function:
+
+```js
+addtoCart(event, variantId, title, price, type, vendor)
+```
+
+To preserve the existing cart-notification toast and analytics pipeline,
+the sticky bar **delegates to that function** rather than posting directly
+to `/cart/add.js`. The default `Theme add-to-cart function` setting is
+already `addtoCart`. Leave it set on Dermalogica.
+
+### Selling plan (subscription) support
+
+The sticky bar passes selling plan as the 7th positional argument and as
+an options object on the 8th:
+
+```js
+addtoCart(
+  event, variantId, title, price, type, vendor,
+  sellingPlanId,                           // '' for one-time
+  { source: 'sticky-atc',
+    sellingPlanId,
+    properties: { _source: 'sticky-atc' } }
+)
+```
+
+If the current `addtoCart()` doesn't yet read `arguments[6]` /
+`arguments[7]`, please extend it to pass `selling_plan` and `properties`
+through to the cart request. Backwards compatible — older callers ignore
+the new args.
+
+### Promise return contract
+
+If `addtoCart()` returns a Promise, the bar awaits it before tracking
+success. If it returns synchronously, success is assumed. If it throws,
+the bar tracks `atc_error` and shows the error label.
+
+### Page variant sync (no Shopify form)
+
+When the page has no Shopify form, set `Page variant attribute selector`
+(default `[data-variant-id]`) to an element whose `data-variant-id`
+reflects the active variant. The bar uses a `MutationObserver` to keep its
+size selector in sync when the user changes the variant on the page.
+
+### Switching to standard Shopify form behavior
+
+Clear the `Theme add-to-cart function` setting to make the bar submit
+directly to `/cart/add.js` (the default Shopify Plus / Dawn behavior).
+
 ## Subscriptions (Recharge)
 
 Dermalogica uses **Recharge Checkout on Shopify**, which exposes subscriptions

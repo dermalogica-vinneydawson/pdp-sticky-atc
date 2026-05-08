@@ -25,14 +25,22 @@
       "type": "text",
       "id": "trigger_selector",
       "label": "Default add-to-cart button selector",
-      "default": "form[action*='/cart/add'] [type='submit']",
-      "info": "Sticky bar appears when this default button is outside the viewport."
+      "default": ".atc_variant_button.pcp-atc, form[action*='/cart/add'] [type='submit']",
+      "info": "Sticky bar appears when this default button is outside the viewport. Default matches the live PDP's pcp-atc button and standard Shopify forms."
     },
     {
       "type": "text",
       "id": "variant_selector",
       "label": "Default variant input selector",
-      "default": "form[action*='/cart/add'] [name='id']"
+      "default": "form[action*='/cart/add'] [name='id']",
+      "info": "Used to two-way-sync the bar with the page's product form. Leave blank if the page has no Shopify form (e.g. live PDP using addtoCart())."
+    },
+    {
+      "type": "text",
+      "id": "page_variant_attribute_selector",
+      "label": "Page variant attribute selector",
+      "default": "[data-variant-id]",
+      "info": "Optional. CSS selector for an element whose data-variant-id reflects the currently-selected variant on the page. Used when the page has no Shopify form."
     },
     {
       "type": "text",
@@ -209,6 +217,17 @@
       "label": "Line item source value",
       "default": "sticky-atc",
       "info": "Value written to properties[_source] on items added via the sticky bar."
+    },
+    {
+      "type": "header",
+      "content": "Theme integration"
+    },
+    {
+      "type": "text",
+      "id": "theme_atc_function",
+      "label": "Theme add-to-cart function",
+      "info": "Optional. Name of a global JS function (e.g. addtoCart) the bar should call instead of submitting directly to /cart/add.js. Use this when the theme has a custom ATC pipeline that triggers the cart notification and analytics. Leave blank for standard Shopify form behavior.",
+      "default": "addtoCart"
     },
     {
       "type": "text",

@@ -17,6 +17,12 @@ class DermalogicaStickyAtc extends HTMLElement {
     this.defaultVariantSelector = this.dataset.variantSelector || 'form[action*="/cart/add"] [name="id"]';
     this.defaultSellingPlanSelector = this.dataset.sellingPlanSelector || 'form[action*="/cart/add"] [name="selling_plan"]';
     this.cartNotificationSelector = this.dataset.cartNotificationSelector || '';
+    this.themeAtcFunctionName = this.dataset.themeAtcFunction || '';
+    this.pageVariantAttributeSelector = this.dataset.pageVariantAttributeSelector || '';
+    this.productTitle = this.dataset.productTitle || '';
+    this.productType = this.dataset.productType || '';
+    this.productVendor = this.dataset.productVendor || '';
+    this.productPrice = this.dataset.productPrice || '';
     this.productId = this.dataset.productId || '';
     this.pageProductId = this.dataset.pageProductId || '';
     this.overrideActive = this.dataset.overrideActive === 'true';
@@ -54,6 +60,7 @@ class DermalogicaStickyAtc extends HTMLElement {
   disconnectedCallback() {
     document.removeEventListener('click', this.handleDocumentClick);
     this.observer?.disconnect();
+    this.pageVariantObserver?.disconnect();
     this.defaultVariantControl?.removeEventListener('change', this.handleDefaultVariantChange);
     this.defaultSellingPlanControl?.removeEventListener('change', this.handleDefaultSellingPlanChange);
     this.form?.removeEventListener('submit', this.handleSubmit);
@@ -108,9 +115,28 @@ class DermalogicaStickyAtc extends HTMLElement {
     // override that differs from the page product — variant IDs would be wrong.
     if (this.overrideActive) return;
 
-    this.defaultVariantControl = document.querySelector(this.defaultVariantSelector);
-    this.defaultSellingPlanControl = document.querySelector(this.defaultSellingPlanSelector);
+    this.defaultVariantControl = this.defaultVariantSelector ? document.querySelector(this.defaultVariantSelector) : null;
+    this.defaultSellingPlanControl = this.defaultSellingPlanSelector ? document.querySelector(this.defaultSellingPlanSelector) : null;
     this.defaultVariantControl?.addEventListener('change', this.handleDefaultVariantChange);
+
+    // When the page has no Shopify form (custom PDP using addtoCart()), watch
+    // an element whose data-variant-id reflects the active variant.
+    if (!this.defaultVariantControl && this.pageVariantAttributeSelector) {
+      this.pageVariantAttrEl = document.querySelector(this.pageVariantAttributeSelector);
+      if (this.pageVariantAttrEl) {
+        const initial = this.pageVariantAttrEl.dataset.variantId;
+        if (initial) this.selectVariant(initial, false);
+
+        this.pageVariantObserver = new MutationObserver(() => {
+          const vid = this.pageVariantAttrEl?.dataset.variantId;
+          if (vid && vid !== this.variantInput?.value) this.selectVariant(vid, false);
+        });
+        this.pageVariantObserver.observe(this.pageVariantAttrEl, {
+          attributes: true,
+          attributeFilter: ['data-variant-id'],
+        });
+      }
+    }
 
     this.handleDefaultSellingPlanChange = () => {
       const value = this.defaultSellingPlanControl?.value || '';
@@ -343,6 +369,16 @@ class DermalogicaStickyAtc extends HTMLElement {
     }
     this.track('atc_click');
 
+    // If the theme has a custom ATC function (e.g. addtoCart on the live PDP),
+    // delegate so the cart notification, analytics, and any other side
+    // effects fire through the theme's existing pipeline. The theme function
+    // is responsible for the actual /cart/add request.
+    if (this.themeAtcFunctionName && typeof window[this.themeAtcFunctionName] === 'function') {
+      event.preventDefault();
+      this.delegateToThemeFunction(event);
+      return;
+    }
+
     if (!window.fetch || !this.form) {
       // Let the browser perform a normal submit. The button is briefly disabled
       // to prevent a double-submit while navigation kicks in.
@@ -395,6 +431,57 @@ class DermalogicaStickyAtc extends HTMLElement {
       this.setStatus(this.errorLabel, true);
       this.setSubmitting(false);
       this.track('atc_error', { reason: 'network' });
+    }
+  }
+
+  delegateToThemeFunction(originalEvent) {
+    const fn = window[this.themeAtcFunctionName];
+    const variantId = Number(this.variantInput?.value) || this.variantInput?.value;
+    const selected = this.sizeOptions.find((o) => o.getAttribute('aria-selected') === 'true');
+    const price = selected?.dataset.variantPrice || this.productPrice;
+    const sellingPlanId = this.selectedSellingPlanId || '';
+
+    this.setSubmitting(true);
+    this.setStatus('');
+
+    try {
+      // Live PDP signature: addtoCart(event, variantId, title, price, type, vendor)
+      // Pass selling_plan as a 7th arg and an options object as 8th so the
+      // theme function can opt into subscription support without a breaking
+      // signature change.
+      const result = fn.call(
+        window,
+        originalEvent,
+        variantId,
+        this.productTitle,
+        price,
+        this.productType,
+        this.productVendor,
+        sellingPlanId,
+        { source: 'sticky-atc', sellingPlanId, properties: { _source: 'sticky-atc' } },
+      );
+
+      // If the theme function returns a promise, await it; otherwise treat as
+      // fire-and-forget and assume success after a short delay.
+      const settle = (data) => {
+        this.track('atc_success', { delegated: true, ...(data && typeof data === 'object' ? { line_item_id: data.id || '' } : {}) });
+        this.dispatchEvent(new CustomEvent('sticky-atc:added', { bubbles: true, detail: data || null }));
+        this.showAddedState();
+      };
+
+      if (result && typeof result.then === 'function') {
+        result.then(settle).catch((err) => {
+          this.setStatus(this.errorLabel, true);
+          this.setSubmitting(false);
+          this.track('atc_error', { reason: err?.message || 'theme_function', delegated: true });
+        });
+      } else {
+        settle(result);
+      }
+    } catch (err) {
+      this.setStatus(this.errorLabel, true);
+      this.setSubmitting(false);
+      this.track('atc_error', { reason: err?.message || 'theme_function_threw', delegated: true });
     }
   }
 
