@@ -45,7 +45,7 @@
         disabled
       >
 
-      <div class="dgo-sticky-atc__select">
+      <div class="dgo-sticky-atc__select{% if section.settings.show_size_tag_labels %} has-size-tags{% else %} hide-size-tags{% endif %}">
         <button
           aria-expanded="false"
           aria-haspopup="listbox"

@@ -362,7 +362,7 @@ h2 {
 
 .select-menu {
   position: absolute;
-  right: -100%;
+  right: 0;
   bottom: calc(100% + 7px);
   left: 0;
   z-index: 2;
@@ -372,6 +372,10 @@ h2 {
   border-radius: var(--radius);
   background: #ffffff;
   box-shadow: 0 12px 32px rgba(40, 49, 56, 0.16);
+}
+
+.custom-select.has-size-tags .select-menu {
+  right: -100%;
 }
 
 .select-menu button {

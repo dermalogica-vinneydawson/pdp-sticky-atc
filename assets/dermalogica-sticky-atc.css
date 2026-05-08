@@ -93,7 +93,7 @@
 
 .dgo-sticky-atc__menu {
   position: absolute;
-  right: -100%;
+  right: 0;
   bottom: calc(100% + 7px);
   left: 0;
   z-index: 2;
@@ -103,6 +103,10 @@
   border-radius: var(--dgo-sticky-atc-radius);
   background: #fff;
   box-shadow: 0 12px 32px rgba(40, 49, 56, 0.16);
+}
+
+.dgo-sticky-atc__select.has-size-tags .dgo-sticky-atc__menu {
+  right: -100%;
 }
 
 .dgo-sticky-atc__option {

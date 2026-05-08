@@ -134,7 +134,7 @@ function App() {
 
         <aside className={`sticky-atc ${isStickyVisible ? 'is-visible' : ''}`}>
           <div className="sticky-atc-inner">
-            <div className="custom-select">
+            <div className={`custom-select ${showSizeTags ? 'has-size-tags' : 'hide-size-tags'}`}>
               <button
                 aria-expanded={isDropdownOpen}
                 aria-haspopup="listbox"
