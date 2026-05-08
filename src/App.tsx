@@ -14,6 +14,8 @@ const sizes: Size[] = [
   { id: 'bundle', label: '2.6 oz + refill', meta: 'refill bundle' },
 ];
 
+const productImage = `${import.meta.env.BASE_URL}images/gallery-1-benefits.jpg`;
+
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const defaultButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -63,7 +65,7 @@ function App() {
 
           <section className="mock-product">
             <img
-              src="/images/gallery-1-benefits.jpg"
+              src={productImage}
               alt="Daily Microfoliant product"
             />
             <div className="mock-product-copy">
@@ -75,7 +77,7 @@ function App() {
             <div className="default-form">
               <label>
                 size
-                <select defaultValue="value">
+                <select defaultValue="retail">
                   {sizes.map((size) => (
                     <option key={size.id} value={size.id}>
                       {size.label}
