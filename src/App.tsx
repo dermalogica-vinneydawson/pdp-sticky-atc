@@ -846,7 +846,7 @@ export default function App() {
               aria-selected={purchaseType === 'one-time'}
               onClick={() => setPurchaseType('one-time')}
             >
-              One-time
+              <span className="sticky-type-label">One-time</span>
             </button>
             <button
               type="button"
@@ -855,7 +855,7 @@ export default function App() {
               aria-selected={purchaseType === 'subscribe'}
               onClick={() => setPurchaseType('subscribe')}
             >
-              <span>Subscribe</span>
+              <span className="sticky-type-label">Subscribe</span>
               <span className="sticky-type-badge" aria-hidden="true">2× pts</span>
             </button>
           </div>

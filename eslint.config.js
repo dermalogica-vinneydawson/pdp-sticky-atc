@@ -6,7 +6,10 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores([
+    'dist',
+    'Daily Microfoliant Exfoliator Smooths & Brightens Skin _ Dermalogica®_files',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

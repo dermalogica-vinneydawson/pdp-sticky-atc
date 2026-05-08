@@ -30,7 +30,7 @@ afterEach(() => {
 })
 
 function updatePurchasePanelVisibility(isIntersecting: boolean) {
-  const purchasePanel = document.querySelector('.purchase-panel')
+  const purchasePanel = document.querySelector('.purchase-section')
   const callback = observerCallback
 
   if (!purchasePanel || !callback) {
@@ -62,17 +62,16 @@ describe('sticky add to cart', () => {
   test('stays synchronized with selected size and quantity', async () => {
     const user = userEvent.setup()
     render(<App />)
-    const purchasePanel = document.querySelector('.purchase-panel')
+    const purchasePanel = document.querySelector('.purchase-section')
 
     if (!purchasePanel) {
       throw new Error('Purchase panel was not rendered')
     }
 
-    await user.click(
-      within(purchasePanel as HTMLElement).getByRole('button', {
-        name: /3.4 oz/i,
-      }),
-    )
+    await user.click(within(purchasePanel as HTMLElement).getByRole('button', {
+      name: /2.6 oz/i,
+    }))
+    await user.click(screen.getByRole('option', { name: /1.4 oz/i }))
     await user.click(
       within(purchasePanel as HTMLElement).getByRole('button', {
         name: /increase quantity/i,
@@ -84,10 +83,9 @@ describe('sticky add to cart', () => {
       name: /sticky add to cart/i,
     })
 
-    expect(within(stickyCart).getAllByText('3.4 oz').length).toBeGreaterThan(0)
-    expect(within(stickyCart).getByText('2 items')).toBeInTheDocument()
+    expect(within(stickyCart).getAllByText('1.4 oz').length).toBeGreaterThan(0)
     expect(
-      within(stickyCart).getByRole('button', { name: /add to cart - \$208/i }),
+      within(stickyCart).getByRole('button', { name: /subscribe\s*\$98/i }),
     ).toBeInTheDocument()
   })
 })
