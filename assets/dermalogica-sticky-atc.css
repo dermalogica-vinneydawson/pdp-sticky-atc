@@ -34,6 +34,12 @@
   display: none;
 }
 
+/* Hide while TryNow ("Try Before You Buy") is the active purchase option —
+   the live PDP toggles `html.trynow-active` from trynow-status-rule.liquid. */
+html.trynow-active .dgo-sticky-atc {
+  display: none;
+}
+
 /* Inert is the source of truth for "not interactive" — also hide visually
    in older browsers that don't support the inert attribute. */
 .dgo-sticky-atc[inert] {

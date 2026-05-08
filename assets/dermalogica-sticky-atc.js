@@ -51,10 +51,29 @@ class DermalogicaStickyAtc extends HTMLElement {
     this.bindDefaultFormSync();
     this.bindTriggerObserver();
     this.bindSubmit();
+    this.bindTryNowSuppression();
     this.syncDefaultVariant();
     this.syncDefaultSellingPlan();
     this.updateSellingPlan();
     this.updateAvailabilityState();
+  }
+
+  bindTryNowSuppression() {
+    this.handleTryNowToggle = (event) => {
+      const active = !!(event?.detail?.active ?? document.documentElement.classList.contains('trynow-active'));
+      this.suppressedByTryNow = active;
+      if (active) {
+        this.classList.remove('is-visible');
+        this.setAttribute('inert', '');
+        this.closeMenu(this.sizeMenu, this.sizeSelectButton);
+        this.closeMenu(this.purchaseMenu, this.purchaseSelectButton);
+      }
+    };
+    document.addEventListener('trynow:toggle', this.handleTryNowToggle);
+    // Initial state — TryNow may already be on from a saved cookie before the bar mounts.
+    if (document.documentElement.classList.contains('trynow-active')) {
+      this.handleTryNowToggle();
+    }
   }
 
   disconnectedCallback() {
@@ -65,6 +84,7 @@ class DermalogicaStickyAtc extends HTMLElement {
     this.defaultSellingPlanControl?.removeEventListener('change', this.handleDefaultSellingPlanChange);
     this.form?.removeEventListener('submit', this.handleSubmit);
     this.removeEventListener('keydown', this.handleKeydown);
+    if (this.handleTryNowToggle) document.removeEventListener('trynow:toggle', this.handleTryNowToggle);
   }
 
   bindSizeSelect() {
@@ -149,14 +169,16 @@ class DermalogicaStickyAtc extends HTMLElement {
     const trigger = document.querySelector(this.triggerSelector);
 
     if (!trigger) {
-      this.classList.add('is-visible');
-      this.removeAttribute('inert');
+      if (!this.suppressedByTryNow) {
+        this.classList.add('is-visible');
+        this.removeAttribute('inert');
+      }
       return;
     }
 
     this.observer = new IntersectionObserver(
       ([entry]) => {
-        const visible = !entry.isIntersecting;
+        const visible = !entry.isIntersecting && !this.suppressedByTryNow;
         this.classList.toggle('is-visible', visible);
         // Keep the bar out of the tab order and hidden from assistive tech
         // when not visible — opacity:0 alone leaves controls focusable.
