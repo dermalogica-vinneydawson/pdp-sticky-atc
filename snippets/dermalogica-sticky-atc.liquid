@@ -75,6 +75,9 @@
 
   <dermalogica-sticky-atc
     class="dgo-sticky-atc"
+    role="region"
+    aria-label="{{ section.settings.region_label | default: 'Sticky add to cart' | escape }}"
+    inert
     data-mobile-only="{{ section.settings.mobile_only }}"
     data-trigger-selector="{{ section.settings.trigger_selector | escape }}"
     data-variant-selector="{{ section.settings.variant_selector | escape }}"
@@ -89,7 +92,7 @@
     data-adding-label="{{ section.settings.adding_label | escape }}"
     data-added-label="{{ section.settings.added_label | escape }}"
     data-error-label="{{ section.settings.error_label | escape }}"
-    data-cart-drawer-selector="{{ section.settings.cart_drawer_selector | escape }}"
+    data-cart-notification-selector="{{ section.settings.cart_notification_selector | escape }}"
     data-event-namespace="{{ section.settings.event_namespace | default: 'sticky_atc' | escape }}"
     data-experiment-id="{{ section.settings.experiment_id | escape }}"
     data-experiment-variant="{{ section.settings.experiment_variant | escape }}"
@@ -120,6 +123,7 @@
 
       <div class="dgo-sticky-atc__select{% if section.settings.show_size_tag_labels %} has-size-tags{% else %} hide-size-tags{% endif %}">
         <button
+          aria-controls="dgo-sticky-atc-size-menu-{{ section.id }}"
           aria-expanded="false"
           aria-haspopup="listbox"
           aria-label="{{ section.settings.size_label | escape }}"
@@ -134,7 +138,7 @@
           <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
         </button>
 
-        <div class="dgo-sticky-atc__menu" data-sticky-atc-size-menu hidden role="listbox" aria-label="{{ section.settings.size_label | escape }}">
+        <div id="dgo-sticky-atc-size-menu-{{ section.id }}" class="dgo-sticky-atc__menu" data-sticky-atc-size-menu hidden role="listbox" aria-label="{{ section.settings.size_label | escape }}">
           {%- for variant in sticky_product.variants -%}
             {%- liquid
               assign selling_plan_id = ''
@@ -200,6 +204,7 @@
       {%- if section.settings.show_purchase_type_dropdown -%}
         <div class="dgo-sticky-atc__select purchase-select">
           <button
+            aria-controls="dgo-sticky-atc-purchase-menu-{{ section.id }}"
             aria-expanded="false"
             aria-haspopup="listbox"
             aria-label="{{ section.settings.purchase_type_label | escape }}"
@@ -214,7 +219,7 @@
             <span class="dgo-sticky-atc__chevron" aria-hidden="true"></span>
           </button>
 
-          <div class="dgo-sticky-atc__menu" data-sticky-atc-purchase-menu hidden role="listbox" aria-label="{{ section.settings.purchase_type_label | escape }}">
+          <div id="dgo-sticky-atc-purchase-menu-{{ section.id }}" class="dgo-sticky-atc__menu" data-sticky-atc-purchase-menu hidden role="listbox" aria-label="{{ section.settings.purchase_type_label | escape }}">
             <button
               aria-selected="true"
               class="dgo-sticky-atc__option"

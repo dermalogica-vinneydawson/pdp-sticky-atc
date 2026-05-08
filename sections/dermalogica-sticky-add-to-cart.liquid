@@ -212,10 +212,17 @@
     },
     {
       "type": "text",
-      "id": "cart_drawer_selector",
-      "label": "Cart drawer trigger selector",
-      "info": "Optional. CSS selector for the cart drawer/icon to open after a successful add (e.g. cart-drawer, [data-cart-drawer-toggle]).",
-      "default": "cart-drawer, [data-cart-drawer-toggle]"
+      "id": "cart_notification_selector",
+      "label": "Cart notification selector",
+      "info": "Optional. CSS selector for the post-add cart notification element (e.g. cart-notification, [data-cart-notification]). The script will call .open() / .show() if available, otherwise rely on the dispatched cart:item-added event.",
+      "default": "cart-notification, [data-cart-notification]"
+    },
+    {
+      "type": "text",
+      "id": "region_label",
+      "label": "Accessible region label",
+      "default": "Sticky add to cart",
+      "info": "Announced by screen readers as the landmark for this bar."
     },
     {
       "type": "color",

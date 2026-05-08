@@ -16,7 +16,7 @@ class DermalogicaStickyAtc extends HTMLElement {
     this.triggerSelector = this.dataset.triggerSelector || 'form[action*="/cart/add"] [type="submit"]';
     this.defaultVariantSelector = this.dataset.variantSelector || 'form[action*="/cart/add"] [name="id"]';
     this.defaultSellingPlanSelector = this.dataset.sellingPlanSelector || 'form[action*="/cart/add"] [name="selling_plan"]';
-    this.cartDrawerSelector = this.dataset.cartDrawerSelector || '';
+    this.cartNotificationSelector = this.dataset.cartNotificationSelector || '';
     this.productId = this.dataset.productId || '';
     this.pageProductId = this.dataset.pageProductId || '';
     this.overrideActive = this.dataset.overrideActive === 'true';
@@ -124,6 +124,7 @@ class DermalogicaStickyAtc extends HTMLElement {
 
     if (!trigger) {
       this.classList.add('is-visible');
+      this.removeAttribute('inert');
       return;
     }
 
@@ -131,6 +132,15 @@ class DermalogicaStickyAtc extends HTMLElement {
       ([entry]) => {
         const visible = !entry.isIntersecting;
         this.classList.toggle('is-visible', visible);
+        // Keep the bar out of the tab order and hidden from assistive tech
+        // when not visible — opacity:0 alone leaves controls focusable.
+        if (visible) {
+          this.removeAttribute('inert');
+        } else {
+          this.setAttribute('inert', '');
+          this.closeMenu(this.sizeMenu, this.sizeSelectButton);
+          this.closeMenu(this.purchaseMenu, this.purchaseSelectButton);
+        }
         if (visible && !this.hasTrackedShown) {
           this.hasTrackedShown = true;
           this.track('shown');
@@ -380,7 +390,7 @@ class DermalogicaStickyAtc extends HTMLElement {
       document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: data }));
 
       this.showAddedState();
-      this.openCartDrawer();
+      this.openCartNotification();
     } catch (err) {
       this.setStatus(this.errorLabel, true);
       this.setSubmitting(false);
@@ -399,7 +409,10 @@ class DermalogicaStickyAtc extends HTMLElement {
 
   setSubmitting(isSubmitting) {
     this.isSubmitting = isSubmitting;
-    if (this.submitButton) this.submitButton.disabled = isSubmitting;
+    if (this.submitButton) {
+      this.submitButton.disabled = isSubmitting;
+      this.submitButton.setAttribute('aria-busy', String(isSubmitting));
+    }
     if (isSubmitting && this.submitLabel) this.submitLabel.textContent = this.addingLabel;
     if (!isSubmitting) this.updateAvailabilityState();
   }
@@ -418,28 +431,30 @@ class DermalogicaStickyAtc extends HTMLElement {
     this.statusEl.classList.toggle('is-error', !!message && isError);
   }
 
-  openCartDrawer() {
-    if (!this.cartDrawerSelector) return;
-    const drawer = document.querySelector(this.cartDrawerSelector);
-    if (!drawer) return;
+  openCartNotification() {
+    // Many themes (Dawn-derived) auto-render the cart notification when they
+    // hear cart:item-added on document — that fires upstream of this method.
+    // This method is a belt-and-suspenders trigger for themes whose
+    // notification element exposes an explicit open/show API.
+    if (!this.cartNotificationSelector) return;
+    const note = document.querySelector(this.cartNotificationSelector);
+    if (!note) return;
 
-    // Try common cart drawer APIs in order of likelihood.
-    if (typeof drawer.open === 'function') {
-      drawer.open();
+    if (typeof note.open === 'function') {
+      note.open();
       return;
     }
-    if (typeof drawer.show === 'function') {
-      drawer.show();
+    if (typeof note.show === 'function') {
+      note.show();
       return;
     }
-    if (drawer.tagName?.toLowerCase().includes('drawer')) {
-      drawer.setAttribute('open', '');
+    if (typeof note.renderContents === 'function') {
+      // Dawn cart-notification API
+      try { note.renderContents({}); } catch (_) { /* theme handles via event */ }
       return;
     }
-    // Fallback: click the toggle (works for theme-toggle buttons).
-    if (typeof drawer.click === 'function') {
-      drawer.click();
-    }
+    note.removeAttribute('hidden');
+    note.setAttribute('aria-hidden', 'false');
   }
 }
 

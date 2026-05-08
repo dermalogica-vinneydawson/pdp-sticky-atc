@@ -34,6 +34,12 @@
   display: none;
 }
 
+/* Inert is the source of truth for "not interactive" — also hide visually
+   in older browsers that don't support the inert attribute. */
+.dgo-sticky-atc[inert] {
+  pointer-events: none;
+}
+
 .dgo-sticky-atc__form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

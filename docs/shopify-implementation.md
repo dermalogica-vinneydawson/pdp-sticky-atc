@@ -59,13 +59,19 @@ different product than the page product. In that mode the bar does **not**
 sync with the page's default product form (variant IDs would be wrong); it is
 a standalone form that submits its own product to the cart.
 
-## Cart drawer integration
+## Cart notification integration
 
-The `Cart drawer trigger selector` setting accepts any CSS selector — typically
-your theme's `<cart-drawer>` element or a toggle button. The script tries
-`element.open()`, `element.show()`, `setAttribute('open', '')`, then
-`element.click()` in order. Most Dawn-derived and Shopify Plus themes hit one
-of these paths.
+Dermalogica uses a cart notification (toast), not a drawer. The bar dispatches
+`cart:item-added` on `document` after a successful add — most Dawn-derived
+themes' `<cart-notification>` element listens for this event and renders
+itself. No additional wiring should be needed.
+
+For belt-and-suspenders, the `Cart notification selector` setting accepts a
+CSS selector (default `cart-notification, [data-cart-notification]`). If the
+element exposes `.open()`, `.show()`, or Dawn's `.renderContents()`, the script
+will call it. If your theme uses a different event name to trigger the
+notification, listen for `sticky-atc:added` (also dispatched on the host
+element) and re-emit your theme's event.
 
 ## Selector settings (theme overrides)
 
@@ -79,12 +85,26 @@ pattern, override these on the section:
 
 ## Accessibility
 
+- The bar is a `role="region"` landmark with a configurable `aria-label`
+  (`Accessible region label` setting).
+- The bar carries the `inert` attribute when off-screen, so its controls are
+  removed from the tab order and hidden from assistive tech until it slides
+  in. (Falls back to `pointer-events: none` for browsers without `inert`
+  support — pre-2022 Safari/iOS.)
 - Dropdowns expose `role="listbox"` / `role="option"` with `aria-selected`,
-  `aria-expanded`, and `aria-haspopup`.
+  `aria-expanded`, `aria-haspopup`, and `aria-controls` linking trigger to
+  menu.
 - Keyboard support: `ArrowUp`/`ArrowDown` to move, `Home`/`End` to jump,
-  `Enter`/`Space` to select, `Escape` to close.
-- Disabled (sold-out) options are skipped during keyboard navigation.
-- Submit status is announced via `aria-live="polite"`.
+  `Enter`/`Space` to select, `Escape` to close. Focus returns to the trigger
+  on close.
+- Disabled (sold-out / unavailable) options are skipped during keyboard
+  navigation and carry `aria-disabled="true"`.
+- Submit button toggles `aria-busy="true"` while the add-to-cart request is
+  in flight.
+- Submit error/status text is rendered into a visually-hidden region with
+  `role="status"` and `aria-live="polite"`; on error it becomes visible.
+- `prefers-reduced-motion` collapses the slide-in transition.
+- All interactive controls have visible `:focus-visible` outlines.
 
 ## A/B testing & tracking (Webflow Optimize / GA4)
 
