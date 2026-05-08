@@ -23,6 +23,11 @@ The tray intentionally contains only:
 - one-time / subscription switch
 - add-to-cart button without price
 
+The Shopify section also includes a `Show size tag labels` setting. When it is
+enabled, each dropdown option can show a secondary variant label such as
+`travel`, `standard`, `retail`, `refill`, or `refill bundle`. When disabled,
+only the size value is shown.
+
 ## Theme setup
 
 Copy the files into the matching folders in a Shopify theme, then add the

@@ -67,22 +67,33 @@
               if variant.selling_plan_allocations.size > 0
                 assign selling_plan_id = variant.selling_plan_allocations.first.selling_plan.id
               endif
+
+              assign variant_size_label = variant.title
+              assign variant_tag_label = ''
+              if variant.option1 != blank and variant.option1 != 'Default Title'
+                assign variant_size_label = variant.option1
+              endif
+              if variant.option2 != blank and variant.option2 != 'Default Title'
+                assign variant_tag_label = variant.option2
+              endif
             -%}
             <button
               aria-selected="{% if variant.id == current_variant.id %}true{% else %}false{% endif %}"
               class="dgo-sticky-atc__option"
               data-sticky-atc-option
               data-variant-id="{{ variant.id }}"
-              data-variant-title="{{ variant.title | escape }}"
+              data-variant-title="{{ variant_size_label | escape }}"
               data-selling-plan-id="{{ selling_plan_id }}"
               role="option"
               type="button"
               {% unless variant.available %}disabled{% endunless %}
             >
-              <span>{{ variant.title }}</span>
-              {%- unless variant.available -%}
+              <span>{{ variant_size_label }}</span>
+              {%- if section.settings.show_size_tag_labels and variant_tag_label != blank -%}
+                <small>{{ variant_tag_label }}</small>
+              {%- elsif variant.available == false -%}
                 <small>{{ section.settings.sold_out_label }}</small>
-              {%- endunless -%}
+              {%- endif -%}
             </button>
           {%- endfor -%}
         </div>
